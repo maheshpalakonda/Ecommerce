@@ -18,20 +18,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'add to cart.html'));
 });
 
-// MySQL Connection
+// MySQL Connection using environment variables
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",      // change if needed
-    password: "Vasu@1526",      // your MySQL password
-    database: "quickcartdb"
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "root",
+    database: process.env.DB_NAME || "ecommerce"
 });
 
 db.connect(err => {
     if (err) {
-        console.error("DB connection failed:", err);
+        console.error("❌ DB connection failed:", err);
         return;
     }
-    console.log("Connected to MySQL");
+    console.log("✅ Connected to MySQL");
 });
 
 // ==========================
@@ -40,18 +40,23 @@ db.connect(err => {
 app.post("/register/customer", async (req, res) => {
     const { fullname, email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.query(
-        "INSERT INTO customers (fullname, email, password) VALUES (?, ?, ?)",
-        [fullname, email, hashedPassword],
-        (err, result) => {
-            if (err) {
-                return res.status(500).json({ error: err });
+        db.query(
+            "INSERT INTO customers (fullname, email, password) VALUES (?, ?, ?)",
+            [fullname, email, hashedPassword],
+            (err) => {
+                if (err) {
+                    console.error("DB Insert Error:", err);
+                    return res.status(500).json({ error: err });
+                }
+                res.json({ message: "Customer registered successfully!" });
             }
-            res.json({ message: "Customer registered successfully!" });
-        }
-    );
+        );
+    } catch (err) {
+        res.status(500).json({ error: "Registration failed" });
+    }
 });
 
 // ==========================
@@ -77,16 +82,20 @@ app.post("/login/customer", (req, res) => {
 app.post("/register/seller", async (req, res) => {
     const { fullname, business_name, business_type, email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.query(
-        "INSERT INTO sellers (fullname, business_name, business_type, email, password) VALUES (?, ?, ?, ?, ?)",
-        [fullname, business_name, business_type, email, hashedPassword],
-        (err) => {
-            if (err) return res.status(500).json({ error: err });
-            res.json({ message: "Seller registered successfully!" });
-        }
-    );
+        db.query(
+            "INSERT INTO sellers (fullname, business_name, business_type, email, password) VALUES (?, ?, ?, ?, ?)",
+            [fullname, business_name, business_type, email, hashedPassword],
+            (err) => {
+                if (err) return res.status(500).json({ error: err });
+                res.json({ message: "Seller registered successfully!" });
+            }
+        );
+    } catch (err) {
+        res.status(500).json({ error: "Seller registration failed" });
+    }
 });
 
 app.post("/login/seller", (req, res) => {
@@ -109,16 +118,20 @@ app.post("/login/seller", (req, res) => {
 app.post("/register/admin", async (req, res) => {
     const { fullname, email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.query(
-        "INSERT INTO admins (fullname, email, password) VALUES (?, ?, ?)",
-        [fullname, email, hashedPassword],
-        (err) => {
-            if (err) return res.status(500).json({ error: err });
-            res.json({ message: "Admin registered successfully!" });
-        }
-    );
+        db.query(
+            "INSERT INTO admins (fullname, email, password) VALUES (?, ?, ?)",
+            [fullname, email, hashedPassword],
+            (err) => {
+                if (err) return res.status(500).json({ error: err });
+                res.json({ message: "Admin registered successfully!" });
+            }
+        );
+    } catch (err) {
+        res.status(500).json({ error: "Admin registration failed" });
+    }
 });
 
 app.post("/login/admin", (req, res) => {
@@ -135,7 +148,10 @@ app.post("/login/admin", (req, res) => {
     });
 });
 
+// ==========================
 // Start Server
+// ==========================
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);
 });
+
