@@ -83,36 +83,36 @@ app.post("/register/seller", async (req, res) => {
         "INSERT INTO sellers (fullname, business_name, business_type, email, password) VALUES (?, ?, ?, ?, ?)",
         [fullname, business_name, business_type, email, hashedPassword],
         (err) => {
-OAOAOAOAOAOA            if (err) return res.status(500).json({ error: err });
-OA            res.json({ message: "Seller registered successfully!" });
-OA        }
-OAOAOAOA    );
-OA});
+            if (err) return res.status(500).json({ error: err });
+            res.json({ message: "Seller registered successfully!" });
+        }
+    );
+});
 
-OBOBOBOBOBOBOBOBapp.post("/login/seller", (req, res) => {
-OAOA    const { email, password } = req.body;
-OAOA
-OA    db.query("SELECT * FROM sellers WHERE email = ?", [email], async (err, results) => {
+app.post("/login/seller", (req, res) => {
+    const { email, password } = req.body;
+
+    db.query("SELECT * FROM sellers WHERE email = ?", [email], async (err, results) => {
         if (err) return res.status(500).json({ error: err });
-OAOAOA        if (results.length === 0) return res.status(400).json({ message: "Seller not found" });
-OA
-OA        const validPass = await bcrypt.compare(password, results[0].password);
+        if (results.length === 0) return res.status(400).json({ message: "Seller not found" });
+
+        const validPass = await bcrypt.compare(password, results[0].password);
         if (!validPass) return res.status(401).json({ message: "Invalid credentials" });
-OAOA
-OAOA        res.json({ message: "Login successful", seller: results[0] });
+
+        res.json({ message: "Login successful", seller: results[0] });
     });
-OA});
+});
 
 // ==========================
 // Admin Registration/Login
 // ==========================
 app.post("/register/admin", async (req, res) => {
     const { fullname, email, password } = req.body;
-OAOA
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     db.query(
-OAOA        "INSERT INTO admins (fullname, email, password) VALUES (?, ?, ?)",
+        "INSERT INTO admins (fullname, email, password) VALUES (?, ?, ?)",
         [fullname, email, hashedPassword],
         (err) => {
             if (err) return res.status(500).json({ error: err });
@@ -132,10 +132,11 @@ app.post("/login/admin", (req, res) => {
         if (!validPass) return res.status(401).json({ message: "Invalid credentials" });
 
         res.json({ message: "Admin login successful", admin: results[0] });
-OAOAOAOA    });
-OAOA});
-OA
-OAOAOAOAOAOAOAOAOA// Start Server
-OAOAOAOBOBOBOBOAapp.listen(PORT, () => {
+    });
+});
+
+// Start Server
+app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
-OAOA});
+});
+
