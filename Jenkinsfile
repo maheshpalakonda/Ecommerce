@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    environment {
+        # Hardcoded DB credentials matching docker-compose.yaml
+        DB_HOST = "db"
+        DB_USER = "root"
+        DB_PASSWORD = "root"
+        DB_NAME = "quickcartdb"
+        DB_PORT = "3306"
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -10,33 +19,35 @@ pipeline {
 
         stage('Build & Deploy') {
             steps {
-                // Stop containers if running
-                sh 'docker-compose down || echo "No containers running"'
-
-                // Start containers
-                sh 'docker-compose up -d --build'
+                sh 'docker-compose down -v'      // Remove old containers & volumes
+                sh 'docker-compose up -d --build' // Build and start containers
             }
         }
 
         stage('Wait for MySQL') {
             steps {
-                script {
-                    sh '''
-                    echo "Waiting for MySQL to be ready..."
-                    until docker exec ecommerce_db mysql -uroot -proot -e "select 1" > /dev/null 2>&1
-                    do
-                        sleep 5
-                        echo "Still waiting..."
-                    done
-                    echo "MySQL is ready!"
-                    '''
-                }
+                echo "⏳ Waiting for MySQL to be ready..."
+                sh '''
+                for i in {1..20}; do
+                    docker exec mysql_db mysql -uroot -proot -e "SELECT 1;" quickcartdb && break
+                    echo "MySQL not ready yet, retrying..."
+                    sleep 5
+                done
+                '''
+            }
+        }
+
+        stage('Post Deployment') {
+            steps {
+                echo "✅ Deployment finished successfully!"
             }
         }
     }
 
     post {
-        success { echo '✅ Deployment Successful!' }
-        failure { echo '❌ Deployment Failed!' }
+        failure {
+            echo "❌ Deployment failed!"
+        }
     }
 }
+

@@ -5,11 +5,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_PORT=${DB_PORT}
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=quickcartdb
+      - DB_PORT=3306
     depends_on:
       - db
     restart: always
@@ -19,8 +19,8 @@ services:
     container_name: mysql_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: quickcartdb
     ports:
       - "3306:3306"
     volumes:
