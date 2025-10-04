@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'master', url: 'https://github.com/maheshpalakonda/test-1.git'
+                git branch: 'master', url: 'https://github.com/maheshpalakonda/Ecommerce.git'
             }
         }
 
