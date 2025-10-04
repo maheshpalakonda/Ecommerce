@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        # Hardcoded DB credentials matching docker-compose.yaml
+        // Hardcoded DB credentials matching docker-compose.yaml
         DB_HOST = "db"
         DB_USER = "root"
         DB_PASSWORD = "root"
